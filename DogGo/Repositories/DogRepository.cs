@@ -68,11 +68,14 @@ namespace DogGo.Repositories
 
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"
-                SELECT Id, Name, Breed, Notes, ImageUrl, OwnerId 
-                FROM Dog
-                WHERE OwnerId = @ownerId
-            ";
+                    cmd.CommandText = @"SELECT d.Id,
+                                               d.[Name],
+                                               Breed,
+                                               o.[Name] AS Owner
+                                        FROM Dog d
+                                        LEFT JOIN [Owner] o ON
+                                            d.OwnerId = o.Id
+                                        WHERE d.OwnerId = @ownerId";
 
                     cmd.Parameters.AddWithValue("@ownerId", ownerId);
 
@@ -87,18 +90,18 @@ namespace DogGo.Repositories
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
                             Breed = reader.GetString(reader.GetOrdinal("Breed")),
-                            OwnerId = reader.GetInt32(reader.GetOrdinal("OwnerId"))
+                            Owner = new Owner() { Name = reader.GetString(reader.GetOrdinal("Owner")) }
                         };
 
                         // Check if optional columns are null
-                        if (reader.IsDBNull(reader.GetOrdinal("Notes")) == false)
-                        {
-                            dog.Notes = reader.GetString(reader.GetOrdinal("Notes"));
-                        }
-                        if (reader.IsDBNull(reader.GetOrdinal("ImageUrl")) == false)
-                        {
-                            dog.ImageUrl = reader.GetString(reader.GetOrdinal("ImageUrl"));
-                        }
+                        //if (reader.IsDBNull(reader.GetOrdinal("Notes")) == false)
+                        //{
+                        //    dog.Notes = reader.GetString(reader.GetOrdinal("Notes"));
+                        //}
+                        //if (reader.IsDBNull(reader.GetOrdinal("ImageUrl")) == false)
+                        //{
+                        //    dog.ImageUrl = reader.GetString(reader.GetOrdinal("ImageUrl"));
+                        //}
 
                         dogs.Add(dog);
                     }
@@ -118,6 +121,7 @@ namespace DogGo.Repositories
                     cmd.CommandText = @"SELECT d.Id,
                                                d.[Name],
                                                Breed,
+                                               OwnerId,
                                                o.[Name] AS Owner
                                         FROM Dog d
                                         LEFT JOIN Owner o ON
@@ -135,6 +139,7 @@ namespace DogGo.Repositories
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
                             Breed = reader.GetString(reader.GetOrdinal("Breed")),
+                            OwnerId = reader.GetInt32(reader.GetOrdinal("OwnerId")),
                             Owner = new Owner() { Name = reader.GetString(reader.GetOrdinal("Owner")) }
                         };
 
@@ -158,18 +163,39 @@ namespace DogGo.Repositories
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                    INSERT INTO Dog ([Name], OwnerId, Breed)
-                    OUTPUT INSERTED.ID
-                    VALUES (@name, @ownerId, @breed);
-                    ";
+                INSERT INTO Dog ([Name], OwnerId, Breed, Notes, ImageUrl)
+                OUTPUT INSERTED.ID
+                VALUES (@name, @ownerId, @breed, @notes, @imageUrl);
+            ";
 
                     cmd.Parameters.AddWithValue("@name", dog.Name);
-                    cmd.Parameters.AddWithValue("@ownerId", dog.OwnerId);
                     cmd.Parameters.AddWithValue("@breed", dog.Breed);
+                    cmd.Parameters.AddWithValue("@ownerId", dog.OwnerId);
 
-                    int id = (int)cmd.ExecuteScalar();
+                    // nullable columns
+                    if (dog.Notes == null)
+                    {
+                        cmd.Parameters.AddWithValue("@notes", DBNull.Value);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@notes", dog.Notes);
+                    }
 
-                    dog.Id = id;
+                    if (dog.ImageUrl == null)
+                    {
+                        cmd.Parameters.AddWithValue("@imageUrl", DBNull.Value);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@imageUrl", dog.ImageUrl);
+                    }
+
+
+                    int newlyCreatedId = (int)cmd.ExecuteScalar();
+
+                    dog.Id = newlyCreatedId;
+
                 }
             }
         }
