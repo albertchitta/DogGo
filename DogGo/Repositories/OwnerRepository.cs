@@ -35,6 +35,7 @@ namespace DogGo.Repositories
                                                Email,
                                                [Address],
                                                Phone,
+                                               NeighborhoodId,
                                                n.[Name] AS Neighborhood
                                         FROM [Owner] o
                                         LEFT JOIN Neighborhood n ON
@@ -51,6 +52,7 @@ namespace DogGo.Repositories
                             Email = reader.GetString(reader.GetOrdinal("Email")),
                             Address = reader.GetString(reader.GetOrdinal("Address")),
                             Phone = reader.GetString(reader.GetOrdinal("Phone")),
+                            NeighborhoodId = reader.GetInt32(reader.GetOrdinal("NeighborHoodId")),
                             Neighborhood = new Neighborhood() { Name = reader.GetString(reader.GetOrdinal("Neighborhood")) }
                         };
 
