@@ -33,6 +33,7 @@ namespace DogGo.Repositories
                     cmd.CommandText = @"SELECT d.Id,
                                                d.[Name],
                                                Breed,
+                                               OwnerId,
                                                o.[Name] AS Owner
                                         FROM Dog d
                                         LEFT JOIN [Owner] o ON
@@ -47,6 +48,7 @@ namespace DogGo.Repositories
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
                             Breed = reader.GetString(reader.GetOrdinal("Breed")),
+                            OwnerId = reader.GetInt32(reader.GetOrdinal("OwnerId")),
                             Owner = new Owner() { Name = reader.GetString(reader.GetOrdinal("Owner")) }
                         };
 
@@ -71,6 +73,7 @@ namespace DogGo.Repositories
                     cmd.CommandText = @"SELECT d.Id,
                                                d.[Name],
                                                Breed,
+                                               OwnerId,
                                                o.[Name] AS Owner
                                         FROM Dog d
                                         LEFT JOIN [Owner] o ON
@@ -90,6 +93,7 @@ namespace DogGo.Repositories
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
                             Breed = reader.GetString(reader.GetOrdinal("Breed")),
+                            OwnerId = reader.GetInt32(reader.GetOrdinal("OwnerId")),
                             Owner = new Owner() { Name = reader.GetString(reader.GetOrdinal("Owner")) }
                         };
 
